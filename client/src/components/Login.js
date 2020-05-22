@@ -1,51 +1,67 @@
-import React, {useState} from "react";
-import axios from "axios"
+import React from "react";
 
-const Login = () => {
+import {axiosWithAuth} from "../utils/axiosWithAuth"
+
+class Login extends React.Component {
   // make a post request to retrieve a token from the api
   // when you have handled the token, navigate to the BubblePage route
-  const [user, setUser] = useState({});
+  state = {
+    account: {
+      username: "",
+      password: "",
+    },
+  };
 
-  const inputChange = e => {
-    setUser ({
-      ...user,
-      [e.target.name] : e.target.value
-    })
-  }
-
-  const loginPost = e => {
+  inputChange = e => {
     e.preventDefault();
-    axios
-    .post(`http.//localhost:3000/api/login`, user)
+    this.setState({
+      account: {
+        ...this.state.account,
+        [e.target.name]: e.target.value,
+      },
+    });
+  };
+
+   login = e => {
+    e.preventDefault();
+    axiosWithAuth()
+    .post('/api/login', this.state.account)
     .then(res => {
       localStorage.setItem('token', res.data.payload)
+      this.props.history.push('/BubblePage')
     })
     .catch(err => console.log(err))
   }
+  render(){
   return (
     <>
       <div className="loginForm">
-        <form onSubmit={loginPost}>
+        <form onSubmit={this.login}>
           <h2>Log In</h2>
           <label>Username</label>
           <input className='login'
-          type="username"
+          type="text"
+          name="username"
           id='username'
-          value={user.username}
-          onChange={inputChange}
+          value={this.state.account.username}
+          onChange={this.inputChange}
           />
           <label>Password</label>
           <input className='password'
           type="password"
+          name='password'
           id='password'
-          value={user.password}
-          onChange={inputChange}
+          value={this.state.account.password}
+          onChange={this.inputChange}
           />
-        </form>
+        
         <button>Log In</button>
+        </form>
       </div>
     </>
   );
+  }
 };
+
 
 export default Login;
